@@ -1,0 +1,12 @@
+# Dependências
+node_modules/
+
+# Variáveis de ambiente / segredos
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Configs locais
+.claude/
+.DS_Store
