@@ -578,6 +578,10 @@
 /* ==================== CONFIGURAÇÃO DA EMPRESA ====================
    Dados fictícios de exemplo. Troque pelos dados reais da sua instituição
    antes de usar (aparecem no corpo, rodapé e partes dos documentos). */
+/* % de multa por cancelamento após o prazo de arrependimento (valor de exemplo:
+   ajuste conforme o seu contrato). */
+var MULTA_PERCENTUAL = 10;
+
 var EMPRESA = {
   razaoSocial: 'ESCOLA DE IDIOMAS EXEMPLO LTDA',
   nomeFantasia: 'Escola de Idiomas Exemplo',
@@ -711,8 +715,8 @@ $('fileLogo').addEventListener('change',function(e){
    Espelha o cálculo do módulo de Cancelamentos do CX Dash. Mudou lá, muda aqui.
 
      ≤ 7 dias da contratação  -> arrependimento: estorno integral, sem multa
-     Recorrente,  > 7 dias    -> multa de 10% do serviço NÃO utilizado, sem estorno
-     Parcelado,   > 7 dias    -> multa de 10% do serviço NÃO utilizado,
+     Recorrente,  > 7 dias    -> multa de MULTA_PERCENTUAL% do serviço NÃO utilizado, sem estorno
+     Parcelado,   > 7 dias    -> multa de MULTA_PERCENTUAL% do serviço NÃO utilizado,
                                  estorno = serviço não utilizado − multa
 
    O material didático/plataforma já entregue nunca é devolvido.
@@ -745,8 +749,8 @@ function calcDistrato(d){
 
   var multa, reembolso;
   if(dentro7)         { multa=0;                      reembolso=total; }
-  else if(recorrente) { multa=servicoRestante*0.10;   reembolso=0; }
-  else                { multa=servicoRestante*0.10;   reembolso=Math.max(0, servicoRestante-multa); }
+  else if(recorrente) { multa=servicoRestante*(MULTA_PERCENTUAL/100);   reembolso=0; }
+  else                { multa=servicoRestante*(MULTA_PERCENTUAL/100);   reembolso=Math.max(0, servicoRestante-multa); }
 
   // só há saldo devedor quando não há o que restituir
   var devido = reembolso>0 ? 0 : (Number(d.parcelasAbertas)||0);
@@ -760,8 +764,8 @@ function calcDistrato(d){
 
 function regraTexto(c){
   if(c.dentro7) return 'Arrependimento (≤ 7 dias da contratação): estorno integral do valor pago, sem multa.';
-  if(c.recorrente) return 'Recorrente após 7 dias: multa de 10% sobre o serviço não utilizado; sem valor a restituir.';
-  return 'Parcelado após 7 dias: multa de 10% sobre o serviço não utilizado; estorno = serviço não utilizado − multa.';
+  if(c.recorrente) return 'Recorrente após 7 dias: multa de '+MULTA_PERCENTUAL+'% sobre o serviço não utilizado; sem valor a restituir.';
+  return 'Parcelado após 7 dias: multa de '+MULTA_PERCENTUAL+'% sobre o serviço não utilizado; estorno = serviço não utilizado − multa.';
 }
 
 /* ==================== GERAR DOCUMENTO ==================== */
@@ -828,12 +832,12 @@ function blocosDistrato(d){
       'contratual e o valor pago é restituído integralmente ao(à) CONTRATANTE.';
   } else if(c.recorrente){
     explicacao='A solicitação de cancelamento foi realizada após o prazo de 7 (sete) dias da contratação. '+
-      'Tratando-se de contratação na modalidade **Recorrente**, incide **multa de 10% (dez por cento)** sobre o valor '+
+      'Tratando-se de contratação na modalidade **Recorrente**, incide **multa de '+MULTA_PERCENTUAL+'%** sobre o valor '+
       'do serviço educacional não utilizado, não havendo valor a restituir. O material didático digital e o acesso '+
       'à plataforma, já disponibilizados ao(à) CONTRATANTE, não são objeto de devolução.';
   } else {
     explicacao='A solicitação de cancelamento foi realizada após o prazo de 7 (sete) dias da contratação. '+
-      'Tratando-se de contratação na modalidade **Parcelado**, incide **multa de 10% (dez por cento)** sobre o valor '+
+      'Tratando-se de contratação na modalidade **Parcelado**, incide **multa de '+MULTA_PERCENTUAL+'%** sobre o valor '+
       'do serviço educacional não utilizado, sendo restituído o saldo do serviço não utilizado, deduzida a multa. '+
       'O material didático digital e o acesso à plataforma, já disponibilizados ao(à) CONTRATANTE, não são objeto '+
       'de devolução.';
@@ -1160,7 +1164,7 @@ function atualizarCalc(){
     linha('Serviço prestado ('+$('dUsados').value+'/'+$('dMeses').value+' meses)', brl(c.servicoUsado))+
     linha('Serviço não utilizado', brl(c.servicoRestante))+
     linha('Material/plataforma (não devolvido)', brl(c.material))+
-    linha('Multa contratual (10%)', brl(c.multa))+
+    linha('Multa contratual ('+MULTA_PERCENTUAL+'%)', brl(c.multa))+
     linha(fim[0], fim[1], 'top')+
     '<div class="regra">'+(c.semDatas
       ? '⚠️ Preencha as duas datas. Sem elas não dá para verificar o arrependimento de 7 dias — está sendo aplicada a regra “após 7 dias”.'
